@@ -1,11 +1,17 @@
 import Koa from 'koa'
+import router from './src/router.js'
+import { valid } from './src/middleware/valid.js'
 
+// 1. server即为文档中的application对象
 const server = new Koa()
 
-server.use((ctx) => {
-  ctx.body = 'hello world'
-})
+// 一、验证用户是否合法
+server.use(valid)
 
-server.listen(8080, '0.0.0.0', () => {
-  console.log("Server is listening on http://127.0.0.1:8080")
+// 二、处理业务逻辑
+server.use(router.routes()).use(router.allowedMethods())
+
+
+server.listen(3000, '0.0.0.0', () => {
+  console.log("Server is listening on http://127.0.0.1:3000")
 })

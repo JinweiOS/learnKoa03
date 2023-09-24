@@ -7,7 +7,7 @@ import { koaBody } from 'koa-body'
 const server = new Koa()
 
 // 一、验证用户是否合法
-server.use(valid)
+// server.use(valid)
 server.use(koaBody({
   multipart: true,
   formidable: {

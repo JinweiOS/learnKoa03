@@ -1,9 +1,12 @@
 import KoaRouter from 'koa-router'
 import path from 'node:path'
 import fs from 'node:fs'
+import { getMimeType } from './mime/mime.js'
+
 const router = new KoaRouter()
+
 // 注册路由表
-router.get('/', (ctx) => {
+router.get('/api', (ctx) => {
   ctx.body = 'hello world'
 })
 
@@ -21,7 +24,7 @@ router.get('/', (ctx) => {
 // })
 
 // CURD BOY
-router.post('/login', (ctx) => {
+router.post('/api/login', (ctx) => {
   // 1.与前端定义出接口库的请求方法，请求路径和请求参数
   // 2.取参数，参数校验（必选参数，参数类型，可选参数）参数校验框架
   // 3.业务逻辑（如果逻辑非常，做好逻辑拆分）
@@ -31,7 +34,7 @@ router.post('/login', (ctx) => {
   ctx.body = 'login'
 })
 
-router.post('/upload', (ctx) => {
+router.post('/api/upload', (ctx) => {
   ctx.body = {
     code: 0,
     msg: '成功',
@@ -39,20 +42,30 @@ router.post('/upload', (ctx) => {
   }
 })
 
-router.get('/download', (ctx) => {
-  const filename = ctx.query.file
-  console.log(filename)
-  const filePath = path.join(process.cwd(), `upload/${filename}`)
-  console.log(filePath)
+router.get('/', (ctx) => {
+  const filename = 'index.html'
+  const filePath = path.join(process.cwd(), `upload/dist/${filename}`)
+  ctx.set('Content-Type', getMimeType(filePath))
   const fileRS = fs.createReadStream(filePath)
-  fileRS.pipe(ctx.res)
-  fileRS.on('close', () => {
-    ctx.body = {
-      code: 0,
-      msg: '成功',
-      data: null
-    }
-  })
+  ctx.body = fileRS
+})
+
+router.get('/:filename', (ctx) => {
+  const filename = ctx.params.filename
+  const filePath = path.join(process.cwd(), `upload/dist/${filename}`)
+  ctx.set('Content-Type', getMimeType(filePath))
+  const fileRS = fs.createReadStream(filePath)
+  ctx.body = fileRS
+})
+
+router.get('/:filename/:other', (ctx) => {
+  const filename = ctx.params.filename
+  const otherName = ctx.params.other
+  // http://127.0.0.1:3000/download/tuchuang_6c8b1d3803e1ff2cc4168fb00.png
+  const filePath = path.join(process.cwd(), `upload/dist/${filename}/${otherName}`)
+  ctx.set('Content-Type', getMimeType(otherName))
+  const fileRS = fs.createReadStream(filePath)
+  ctx.body = fileRS
 })
 
 export default router

@@ -19,8 +19,8 @@ server.use(koaBody({
       const fileName = `tuchuang_${file.newFilename}`
 
       // filepath:  c:/user/dalina/project/beingthink/learnKoa03/upload/00003223423432r23.png
-      // file.newFilename
       file.filepath = `${file.filepath.replace(file.newFilename, fileName)}`;
+      file.newFilename = fileName
     },
   }
 }))

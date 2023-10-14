@@ -21,11 +21,30 @@ async function createUser(user) {
   const { name, passwd } = user
   // passwd不会直接放到数据库中
   const result = await mysql.execute('insert into user(uid, username, password) VALUES (?, ?, ?)', [uuidv4(), name, generatePasswd(passwd)])
-  console.log(result)
+  return result[0].affectedRows === 1
 }
 
-const result = await createUser({name: '彭金为2号', passwd: '123456'})
+// 分页获取图片
+async function getImgList(ps, pn) {
+  const [rows] = await mysql.execute('select * from picture order by pid limit ? offset ?', [`${ps}`, `${ps * (pn - 1)}`])
+  console.log(rows)
+  return rows
+}
+
+// 插入图片
+async function createImg(imgName, size, link) {
+  const uuid = uuidv4()
+  await mysql.execute('insert into picture(pid, p_name, size, link) values(?, ?, ?, ?)', [uuid, imgName, size, link])
+  return uuid
+}
+
+// for(let i = 0; i < 100; i++) {
+//   await createImg('测试', 100, 'https://www.baidu.com')
+// }
 // console.log(result)
+// await getImgList(10, 2) 
 export {
-  createUser
+  createUser,
+  getImgList,
+  createImg
 }

@@ -2,7 +2,7 @@ import KoaRouter from 'koa-router'
 import path from 'node:path'
 import fs from 'node:fs'
 import { getMimeType } from './mime/mime.js'
-import {createUser} from './database/index.js'
+import { createUser, getImgList, createImg } from './database/index.js'
 
 const router = new KoaRouter()
 
@@ -76,7 +76,7 @@ router.post('/api/register', async (ctx) => {
   // 2. 参数校验
   if (username && password) {
     // 保存一下用户信息
-    await createUser({name: username, passwd: password})
+    const result = await createUser({ name: username, passwd: password })
     ctx.body = {
       code: 0,
       data: null,
@@ -89,6 +89,48 @@ router.post('/api/register', async (ctx) => {
       data: null
     }
   }
+})
+
+// 获取所有图片
+router.get('/api/img/list', async (ctx) => {
+  const {pageSize, pageNum} = ctx.query
+  const result = await getImgList(pageSize, pageNum)
+  ctx.body = {
+    code: 0,
+    data: result,
+    msg: 'ok'
+  }
+})
+
+// 上传图片
+router.post('/api/img/upload', async (ctx) => {
+  console.log(ctx.request.files)
+  const filename = ctx.request.files.file.newFilename
+  const size = ctx.request.files.file.size
+  const type = ctx.request.files.file.mimetype
+  // 换成公网ip地址
+  const link = 'http://127.0.0.1:3000/api/download/' + filename
+  const imgId = await createImg(filename, size, link)
+  ctx.body = {
+    code: 0,
+    data: {
+      filename,
+      link,
+      size,
+      imgId
+    },
+    msg: 'ok'
+  }
+})
+
+// 托管上传的静态文件
+router.get('/api/download/:filename', (ctx) => {
+  const filename = ctx.params.filename
+  // http://127.0.0.1:3000/download/tuchuang_6c8b1d3803e1ff2cc4168fb00.png
+  const filePath = path.join(process.cwd(), `upload/${filename}`)
+  ctx.set('Content-Type', getMimeType(filePath))
+  const fileRS = fs.createReadStream(filePath)
+  ctx.body = fileRS
 })
 
 export default router

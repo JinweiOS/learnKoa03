@@ -2,6 +2,7 @@ import KoaRouter from 'koa-router'
 import path from 'node:path'
 import fs from 'node:fs'
 import { getMimeType } from './mime/mime.js'
+import {createUser} from './database/index.js'
 
 const router = new KoaRouter()
 
@@ -66,6 +67,28 @@ router.get('/:filename/:other', (ctx) => {
   ctx.set('Content-Type', getMimeType(otherName))
   const fileRS = fs.createReadStream(filePath)
   ctx.body = fileRS
+})
+
+// 注册逻辑
+router.post('/api/register', async (ctx) => {
+  // 1. 获取参数
+  const { username, password } = ctx.request.body
+  // 2. 参数校验
+  if (username && password) {
+    // 保存一下用户信息
+    await createUser({name: username, passwd: password})
+    ctx.body = {
+      code: 0,
+      data: null,
+      msg: 'ok'
+    }
+  } else {
+    ctx.body = {
+      code: -1,
+      msg: '用户名或者密码不存在',
+      data: null
+    }
+  }
 })
 
 export default router

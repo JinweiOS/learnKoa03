@@ -5,6 +5,8 @@ import { koaBody } from 'koa-body'
 import mount from 'koa-mount'
 import serve from 'koa-static'
 import cors from '@koa/cors'
+import path from 'path'
+import fs from 'fs'
 
 // 1. server即为文档中的application对象
 const apiApp = new Koa()
@@ -32,7 +34,6 @@ apiApp.use(koaBody({
 // 二、处理业务逻辑
 apiApp.use(router.routes()).use(router.allowedMethods())
 
-
 const staticFileApp = new Koa()
 staticFileApp.use(serve(`${process.cwd()}/frontend`))
 
@@ -40,7 +41,13 @@ staticFileApp.use(serve(`${process.cwd()}/frontend`))
 const server = new Koa()
 server.use(mount('/', staticFileApp));
 server.use(mount('/api', apiApp));
-// TODO: history模式的支持
+// history模式的支持
+server.use((ctx) => {
+  const filePath = path.join(process.cwd(), `frontend/index.html`)
+  ctx.set('Content-Type', 'text/html; charset=utf-8')
+  const fileRS = fs.createReadStream(filePath)
+  ctx.body = fileRS
+})
 server.listen(3000, '0.0.0.0', () => {
   console.log('server is listening on http://127.0.0.1:3000')
 })

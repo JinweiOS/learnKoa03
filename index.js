@@ -2,13 +2,17 @@ import Koa from 'koa'
 import router from './src/router.js'
 import { valid } from './src/middleware/valid.js'
 import { koaBody } from 'koa-body'
+import mount from 'koa-mount'
+import serve from 'koa-static'
+import cors from '@koa/cors'
 
 // 1. server即为文档中的application对象
-const server = new Koa()
+const apiApp = new Koa()
 
 // 一、验证用户是否合法
 // server.use(valid)
-server.use(koaBody({
+apiApp.use(cors())
+apiApp.use(koaBody({
   multipart: true,
   formidable: {
     uploadDir: `${process.cwd()}/upload`,
@@ -26,9 +30,17 @@ server.use(koaBody({
 }))
 
 // 二、处理业务逻辑
-server.use(router.routes()).use(router.allowedMethods())
+apiApp.use(router.routes()).use(router.allowedMethods())
 
 
+const staticFileApp = new Koa()
+staticFileApp.use(serve(`${process.cwd()}/frontend`))
+
+// server
+const server = new Koa()
+server.use(mount('/', staticFileApp));
+server.use(mount('/api', apiApp));
+// TODO: history模式的支持
 server.listen(3000, '0.0.0.0', () => {
-  console.log("Server is listening on http://127.0.0.1:3000")
+  console.log('server is listening on http://127.0.0.1:3000')
 })

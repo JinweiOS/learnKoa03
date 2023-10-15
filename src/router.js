@@ -7,7 +7,7 @@ import { createUser, getImgList, createImg } from './database/index.js'
 const router = new KoaRouter()
 
 // 注册路由表
-router.get('/api', (ctx) => {
+router.get('/', (ctx) => {
   ctx.body = 'hello world'
 })
 
@@ -25,7 +25,7 @@ router.get('/api', (ctx) => {
 // })
 
 // CURD BOY
-router.post('/api/login', (ctx) => {
+router.post('/login', (ctx) => {
   // 1.与前端定义出接口库的请求方法，请求路径和请求参数
   // 2.取参数，参数校验（必选参数，参数类型，可选参数）参数校验框架
   // 3.业务逻辑（如果逻辑非常，做好逻辑拆分）
@@ -35,7 +35,7 @@ router.post('/api/login', (ctx) => {
   ctx.body = 'login'
 })
 
-router.post('/api/upload', (ctx) => {
+router.post('/upload', (ctx) => {
   ctx.body = {
     code: 0,
     msg: '成功',
@@ -43,34 +43,34 @@ router.post('/api/upload', (ctx) => {
   }
 })
 
-router.get('/', (ctx) => {
-  const filename = 'index.html'
-  const filePath = path.join(process.cwd(), `upload/dist/${filename}`)
-  ctx.set('Content-Type', getMimeType(filePath))
-  const fileRS = fs.createReadStream(filePath)
-  ctx.body = fileRS
-})
+// router.get('/', (ctx) => {
+//   const filename = 'index.html'
+//   const filePath = path.join(process.cwd(), `upload/dist/${filename}`)
+//   ctx.set('Content-Type', getMimeType(filePath))
+//   const fileRS = fs.createReadStream(filePath)
+//   ctx.body = fileRS
+// })
 
-router.get('/:filename', (ctx) => {
-  const filename = ctx.params.filename
-  const filePath = path.join(process.cwd(), `upload/dist/${filename}`)
-  ctx.set('Content-Type', getMimeType(filePath))
-  const fileRS = fs.createReadStream(filePath)
-  ctx.body = fileRS
-})
+// router.get('/:filename', (ctx) => {
+//   const filename = ctx.params.filename
+//   const filePath = path.join(process.cwd(), `upload/dist/${filename}`)
+//   ctx.set('Content-Type', getMimeType(filePath))
+//   const fileRS = fs.createReadStream(filePath)
+//   ctx.body = fileRS
+// })
 
-router.get('/:filename/:other', (ctx) => {
-  const filename = ctx.params.filename
-  const otherName = ctx.params.other
-  // http://127.0.0.1:3000/download/tuchuang_6c8b1d3803e1ff2cc4168fb00.png
-  const filePath = path.join(process.cwd(), `upload/dist/${filename}/${otherName}`)
-  ctx.set('Content-Type', getMimeType(otherName))
-  const fileRS = fs.createReadStream(filePath)
-  ctx.body = fileRS
-})
+// router.get('/:filename/:other', (ctx) => {
+//   const filename = ctx.params.filename
+//   const otherName = ctx.params.other
+//   // http://127.0.0.1:3000/download/tuchuang_6c8b1d3803e1ff2cc4168fb00.png
+//   const filePath = path.join(process.cwd(), `upload/dist/${filename}/${otherName}`)
+//   ctx.set('Content-Type', getMimeType(otherName))
+//   const fileRS = fs.createReadStream(filePath)
+//   ctx.body = fileRS
+// })
 
 // 注册逻辑
-router.post('/api/register', async (ctx) => {
+router.post('/register', async (ctx) => {
   // 1. 获取参数
   const { username, password } = ctx.request.body
   // 2. 参数校验
@@ -92,7 +92,7 @@ router.post('/api/register', async (ctx) => {
 })
 
 // 获取所有图片
-router.get('/api/img/list', async (ctx) => {
+router.get('/img/list', async (ctx) => {
   const {pageSize, pageNum} = ctx.query
   const result = await getImgList(pageSize, pageNum)
   ctx.body = {
@@ -103,7 +103,7 @@ router.get('/api/img/list', async (ctx) => {
 })
 
 // 上传图片
-router.post('/api/img/upload', async (ctx) => {
+router.post('/img/upload', async (ctx) => {
   console.log(ctx.request.files)
   const filename = ctx.request.files.file.newFilename
   const size = ctx.request.files.file.size
@@ -124,7 +124,7 @@ router.post('/api/img/upload', async (ctx) => {
 })
 
 // 托管上传的静态文件
-router.get('/api/download/:filename', (ctx) => {
+router.get('/download/:filename', (ctx) => {
   const filename = ctx.params.filename
   // http://127.0.0.1:3000/download/tuchuang_6c8b1d3803e1ff2cc4168fb00.png
   const filePath = path.join(process.cwd(), `upload/${filename}`)
